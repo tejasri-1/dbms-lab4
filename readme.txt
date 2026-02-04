@@ -80,19 +80,35 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
 }));
-b)implemented isAuthenticated:middleware function that checks if req.session.user exists. If not, redirect to the login page. Apply this middleware to all dashboard and registration routes to prevent unauthorized access
+b)
+implemented isAuthenticated:middleware function that checks if req.session.user exists. If not, redirect to the login page. Apply this middleware to all dashboard and registration routes to prevent unauthorized access
     console.log("SESSION CHECK:", req.session.user);
     if(!req.session.user) {
         return res.redirect("/login");
     }
+
+implemented check for isInstructor also in app.js:
+function isInstructor(req, res, next) {
+    // TODO: Implement check for instructor role
+    if(req.session.user.role !== "instructor") {
+        return res.status(403).send("Access denied: Instructors only");
+    }
+    next();
+}
+
 step 6: 
-implement user login logic:
+implemented user login logic in this line: app.post('/login', async (req, res) in app.js :
  first initialize pool and upon first query it gets connected to db automatically:
          const pool = getPool(); // initializing pool
         console.log("POOL=",pool);
         const result = await pool.query(
             'SELECT * from users where username=$1',[username]
         );
+and the remaining conditions are also implemented 
+
+step 7:
+
+
 
 
 
