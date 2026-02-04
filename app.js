@@ -45,7 +45,7 @@ function isAuthenticated(req, res, next) {
 
 function isInstructor(req, res, next) {
     // TODO: Implement check for instructor role
-    if(req.session.user.role !== "Instructor") {
+    if(req.session.user.role !== "instructor") {
         return res.status(403).send("Access denied: Instructors only");
     }
     next();
@@ -80,7 +80,7 @@ app.get('/', (req, res) => {
 
 
 app.get('/login', (req, res) => {
-    res.render('login');
+    res.render('login', {error: null});
 });
 
 // TODO: Implement user login logic
@@ -99,12 +99,12 @@ app.post('/login', async (req, res) => {
 
         //1.checking user credentials
         if(result.rows.length == 0) {
-            return res.render("login",{error:"Invalid credentials"});
+            return res.render("login",{error:"Invalid credentials entered"});
         }
 
         const user= result.rows[0];
         if(user.password !== password) {
-            return res.render("login",{error:"Invalid credentials"});
+            return res.render("login",{error:"Invalid credentials entered"});
         }
 
         //2.storing the user object
@@ -117,10 +117,10 @@ app.post('/login', async (req, res) => {
         console.log("SESSION SET:", req.session.user);
 
         //3.redirecting to corresponding page based on role
-        if(user.role == "Student") {
+        if(user.role == "student") {
             res.redirect("/student/dashboard");
         }
-        else if(user.role == "Instructor") {
+        else if(user.role == "instructor") {
             res.redirect("/instructor/dashboard");
         }
         else {
