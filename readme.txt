@@ -8,48 +8,24 @@ step 2:
 DDL.sql and DATA.sql are already in the directory
 
 step 3:
-app.js :contains the backend logic of the application
-view/ : contains all the frontend templates 
-
-check: node app.js (server running or not)
-to exit : ctrl + c
-
-step 4:
-a)implemented isAuthenticated:middleware function that checks if req.session.user exists. If not, redirect to the login page. Apply this middleware to all dashboard and registration routes to prevent unauthorized access
-b)
-
-step 5:
-1️⃣ Connect to PostgreSQL without specifying a DB
-
+1️⃣ Connect to PostgreSQL without specifying a DB:
 Use the default database (postgres):
+    psql -U postgres
 
-psql -U postgres
-
-
-If prompted, enter your postgres password.
+(If prompted, enter your postgres password.)
 
 2️⃣ Create the database
-
 Inside psql:
+    CREATE DATABASE course_reg_db;
 
-CREATE DATABASE course_reg_db;
+You should see: CREATE DATABASE
 
-
-You should see:
-
-CREATE DATABASE
-
-
-Now exit:
-
-\q
+Now exit: \q
 
 3️⃣ Load DDL.sql
 
 Now this will WORK:
-
-psql -U postgres -d course_reg_db -f DDL.sql
-
+    psql -U postgres -d course_reg_db -f DDL.sql
 
 Expected output:
 
@@ -58,8 +34,7 @@ CREATE TABLE
 CREATE TABLE
 
 4️⃣ Load DATA.sql
-psql -U postgres -d course_reg_db -f DATA.sql
-
+    psql -U postgres -d course_reg_db -f DATA.sql
 
 Expected:
 
@@ -68,24 +43,58 @@ INSERT 0 X
 5️⃣ Verify tables exist
 psql -U postgres -d course_reg_db
 
-
 Then:
-
 \dt
 
-
 You must see:
-
  users
  courses
  registrations
 
 
 Test:
-
 SELECT * FROM users;
-
 \q 
+
+step 4:
+app.js :contains the backend logic of the application
+view/ : contains all the frontend templates 
+
+check: node app.js (server running or not)
+to exit : ctrl + c
+
+next in .env file:
+change the user name to :"postgres" , and change the password to your password
+
+step 5:
+a) set the saveUninitialized to false (in app.js)
+change the below to:
+app.use(session({
+    secret: 'your_secret_key',
+    resave: false,
+    saveUninitialized: true,
+}));
+this:
+app.use(session({
+    secret: 'your_secret_key',
+    resave: false,
+    saveUninitialized: false,
+}));
+b)implemented isAuthenticated:middleware function that checks if req.session.user exists. If not, redirect to the login page. Apply this middleware to all dashboard and registration routes to prevent unauthorized access
+    console.log("SESSION CHECK:", req.session.user);
+    if(!req.session.user) {
+        return res.redirect("/login");
+    }
+step 6: 
+implement user login logic:
+ first initialize pool and upon first query it gets connected to db automatically:
+         const pool = getPool(); // initializing pool
+        console.log("POOL=",pool);
+        const result = await pool.query(
+            'SELECT * from users where username=$1',[username]
+        );
+
+
 
 
 ----info----------------------------------------------------------------------------------------
