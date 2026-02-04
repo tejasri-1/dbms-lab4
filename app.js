@@ -418,7 +418,7 @@ app.post('/instructor/add-student', isAuthenticated, isInstructor, async (req, r
 
         // Verify that this course belongs to the logged-in instructor
         const courseResult = await client.query(
-            'SELECT course_id, course_name, credits FROM Courses WHERE course_id = $1 AND instructor_id = $2',
+            'SELECT course_id, course_name, credits, slot FROM Courses WHERE course_id = $1 AND instructor_id = $2',
             [course_id, instructorId]
         );
 
@@ -500,11 +500,25 @@ app.post('/instructor/add-student', isAuthenticated, isInstructor, async (req, r
             [student.user_id]
         );
 
-        const currentCredits = parseInt(creditsResult.rows[0].total_credits, 10) || 0;
-        const newTotalCredits = currentCredits + course.credits;
-        const creditLimit = 24;
+                const currentCredits = parseInt(creditsResult.rows[0].total_credits, 10) || 0;
+                const newTotalCredits = currentCredits + course.credits;
+                const creditLimit = 24;
 
-        // Insert registration regardless of credit limit (override behavior)
+                // Check for slot clash: student already has another course in this slot
+                const slotClashResult = await client.query(
+                        `SELECT 1
+                         FROM Registrations r
+                         JOIN Courses c ON r.course_id = c.course_id
+                         WHERE r.student_id = $1
+                             AND r.status = 'enrolled'
+                             AND c.slot = $2
+                         LIMIT 1`,
+                        [student.user_id, course.slot]
+                );
+
+                const hasSlotClash = slotClashResult.rows.length > 0;
+
+                // Insert registration regardless of credit limit or slot clash (override behavior)
         await client.query(
             'INSERT INTO Registrations (student_id, course_id, status) VALUES ($1, $2, $3)',
             [student.user_id, course.course_id, 'enrolled']
@@ -524,10 +538,15 @@ app.post('/instructor/add-student', isAuthenticated, isInstructor, async (req, r
         );
 
         let message = 'Student added successfully.';
-        let warning = null;
+        const warnings = [];
         if (newTotalCredits > creditLimit) {
-            warning = 'Student added, but credit limit exceeded!';
+            warnings.push('Student added, but credit limit exceeded!');
         }
+        if (hasSlotClash) {
+            warnings.push('Slot clash: Student already registered for another course in this slot.');
+        }
+
+        const warning = warnings.length > 0 ? warnings.join(' ') : null;
 
         return res.render('instructor_course', {
             user: req.session.user,
