@@ -31,17 +31,23 @@ app.set('view engine', 'ejs');
 app.use(session({
     secret: 'your_secret_key',
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
 }));
 
 function isAuthenticated(req, res, next) {
     // TODO: Implement authentication check
-    
+    console.log("SESSION CHECK:", req.session.user);
+    if(!req.session.user) {
+        return res.redirect("/login");
+    }
     next();
 }
 
 function isInstructor(req, res, next) {
     // TODO: Implement check for instructor role
+    if(req.session.user.role !== "Instructor") {
+        return res.status(403).send("Access denied: Instructors only");
+    }
     next();
 }
 
@@ -82,7 +88,49 @@ app.get('/login', (req, res) => {
 // 2. Set session user
 // 3. Redirect to appropriate dashboard based on role
 app.post('/login', async (req, res) => {
+   const {username, password}= req.body; //destructuring comes from one object
+   try {
+        //initiaing pool and upon query a db connection is formed
+        const pool = getPool();
+        console.log("POOL=",pool);
+        const result = await pool.query(
+            'SELECT * from users where username=$1',[username]
+        );
 
+        //1.checking user credentials
+        if(result.rows.length == 0) {
+            return res.render("login",{error:"Invalid credentials"});
+        }
+
+        const user= result.rows[0];
+        if(user.password !== password) {
+            return res.render("login",{error:"Invalid credentials"});
+        }
+
+        //2.storing the user object
+        req.session.user = {
+            user_id : user.user_id,
+            role : user.role,
+            full_name: user.full_name
+        };
+
+        console.log("SESSION SET:", req.session.user);
+
+        //3.redirecting to corresponding page based on role
+        if(user.role == "Student") {
+            res.redirect("/student/dashboard");
+        }
+        else if(user.role == "Instructor") {
+            res.redirect("/instructor/dashboard");
+        }
+        else {
+            res.render("login",{error:"Unknown role"});
+        }
+   }
+   catch (err) {
+    console.error(err);
+    res.status(500).send("Database error");
+   }
 });
 
 app.get('/logout', (req, res) => {
@@ -96,7 +144,7 @@ app.get('/logout', (req, res) => {
 // 2. Fetch all available courses (exclude registered ones)
 // 3. Calculate total credits
 app.get('/student/dashboard', isAuthenticated, async (req, res) => {
-
+    res.send(`Welcome Student $(req.session.user.full_name `);
 });
 
 // TODO: Implement registration logic
@@ -119,7 +167,7 @@ app.post('/student/drop', isAuthenticated, async (req, res) => {
 // TODO: Render instructor dashboard
 // 1. Fetch courses taught by this instructor
 app.get('/instructor/dashboard', isAuthenticated, isInstructor, async (req, res) => {
-
+    res.send(`Welcom Instructor $(req.session.user.full_name `);
 });
 
 // TODO: Show students enrolled in a specific course
