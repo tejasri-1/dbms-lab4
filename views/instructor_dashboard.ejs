@@ -8,6 +8,7 @@
 
 <body>
     <h1>Instructor Dashboard</h1>
+    <p>Welcome, <%= user.full_name %> (Instructor)</p>
     <a href="/logout">Logout</a>
 
     <hr>
@@ -15,6 +16,35 @@
     <!-- TODO: Display Courses Taught by Instructor -->
     <!-- Link to Course Details page (/instructor/course/:id) -->
     <h2>My Courses</h2>
+
+    <% if (courses && courses.length > 0) { %>
+        <table border="1" cellpadding="8" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Course ID</th>
+                    <th>Course Name</th>
+                    <th>Credits</th>
+                    <th>Slot</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% courses.forEach(function(course) { %>
+                    <tr>
+                        <td><%= course.course_id %></td>
+                        <td><%= course.course_name %></td>
+                        <td><%= course.credits %></td>
+                        <td><%= course.slot %></td>
+                        <td>
+                            <a href="/instructor/course/<%= course.course_id %>">Manage Students</a>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <p>You are not assigned to any courses.</p>
+    <% } %>
 
 </body>
 

@@ -8,19 +8,102 @@
 
 <body>
     <h1>Student Dashboard</h1>
+    <p>Welcome, <%= user.full_name %> (Student)</p>
     <a href="/logout">Logout</a>
 
     <hr>
+
+    <% if (error) { %>
+        <p style="color: red;"><%= error %></p>
+    <% } %>
+
+    <% if (success) { %>
+        <p style="color: green;"><%= success %></p>
+    <% } %>
 
     <!-- TODO: Display Registered Courses -->
     <!-- Show: Course ID, Name, Credits, Slot -->
     <!-- Action: Drop Button -->
     <h2>My Registered Courses</h2>
 
+    <p>Total Credits: <%= totalCredits %></p>
+
+    <% if (registeredCourses && registeredCourses.length > 0) { %>
+        <table border="1" cellpadding="8" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Course ID</th>
+                    <th>Course Name</th>
+                    <th>Credits</th>
+                    <th>Slot</th>
+                    <th>Instructor</th>
+                    <th>Capacity</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% registeredCourses.forEach(function(course) { %>
+                    <tr>
+                        <td><%= course.course_id %></td>
+                        <td><%= course.course_name %></td>
+                        <td><%= course.credits %></td>
+                        <td><%= course.slot %></td>
+                        <td><%= course.instructor_name || 'TBA' %></td>
+                        <td><%= course.capacity %></td>
+                        <td>
+                            <form action="/student/drop" method="POST" style="display:inline;">
+                                <input type="hidden" name="course_id" value="<%= course.course_id %>">
+                                <button type="submit" style="color:red;">Drop</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <p>You are not registered in any courses yet.</p>
+    <% } %>
+
     <!-- TODO: Display Available Courses -->
     <!-- Show: Course ID, Name, Credits, Slot, Capacity -->
     <!-- Action: Register Button -->
     <h2>Available Courses</h2>
+
+    <% if (availableCourses && availableCourses.length > 0) { %>
+        <table border="1" cellpadding="8" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Course ID</th>
+                    <th>Course Name</th>
+                    <th>Credits</th>
+                    <th>Slot</th>
+                    <th>Instructor</th>
+                    <th>Capacity</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% availableCourses.forEach(function(course) { %>
+                    <tr>
+                        <td><%= course.course_id %></td>
+                        <td><%= course.course_name %></td>
+                        <td><%= course.credits %></td>
+                        <td><%= course.slot %></td>
+                        <td><%= course.instructor_name || 'TBA' %></td>
+                        <td><%= course.capacity %></td>
+                        <td>
+                            <form action="/student/register" method="POST" style="display:inline;">
+                                <input type="hidden" name="course_id" value="<%= course.course_id %>">
+                                <button type="submit">Register</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <p>No additional courses are available to register.</p>
+    <% } %>
 
 </body>
 

@@ -7,20 +7,71 @@
 </head>
 
 <body>
-    <h1>Manage Course</h1>
+    <h1>Manage Course: <%= course.course_id %> - <%= course.course_name %></h1>
+    <p>Welcome, <%= user.full_name %> (Instructor)</p>
     <a href="/instructor/dashboard">Back to Dashboard</a>
+    <a href="/logout" style="margin-left: 20px;">Logout</a>
 
     <hr>
+
+    <% if (error) { %>
+        <p style="color: red;"><%= error %></p>
+    <% } %>
+
+    <% if (message) { %>
+        <p style="color: green;"><%= message %></p>
+    <% } %>
+
+    <% if (warning) { %>
+        <p style="color: orange; font-weight: bold;"><%= warning %></p>
+    <% } %>
 
     <!-- TODO: Add Student Form -->
     <!-- Input: Student Username -->
     <!-- Action: /instructor/add-student -->
     <h3>Add Student</h3>
+    <form action="/instructor/add-student" method="POST">
+        <input type="hidden" name="course_id" value="<%= course.course_id %>">
+        <label for="username">Student Username:</label>
+        <input type="text" id="username" name="username" required>
+        <button type="submit">Add Student</button>
+    </form>
 
     <!-- TODO: List Enrolled Students -->
     <!-- Show: Student ID, Name -->
     <!-- Action: Remove Button -->
     <h3>Enrolled Students</h3>
+
+    <% if (students && students.length > 0) { %>
+        <table border="1" cellpadding="8" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Student ID</th>
+                    <th>Username</th>
+                    <th>Full Name</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% students.forEach(function(student) { %>
+                    <tr>
+                        <td><%= student.user_id %></td>
+                        <td><%= student.username %></td>
+                        <td><%= student.full_name %></td>
+                        <td>
+                            <form action="/instructor/remove-student" method="POST" style="display:inline;">
+                                <input type="hidden" name="course_id" value="<%= course.course_id %>">
+                                <input type="hidden" name="student_id" value="<%= student.user_id %>">
+                                <button type="submit" style="color:red;">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <p>No students are currently enrolled in this course.</p>
+    <% } %>
 
 </body>
 
