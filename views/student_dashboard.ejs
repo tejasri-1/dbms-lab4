@@ -26,9 +26,9 @@
     <!-- Action: Drop Button -->
     <h2>My Registered Courses</h2>
 
-    <p>Total Credits: <%= totalCredits %></p>
+    <p>Total Credits: <%= total_credits %></p>
 
-    <% if (registeredCourses && registeredCourses.length > 0) { %>
+    <% if (registered_courses && registered_courses.length > 0) { %>
         <table border="1" cellpadding="8" cellspacing="0">
             <thead>
                 <tr>
@@ -42,7 +42,7 @@
                 </tr>
             </thead>
             <tbody>
-                <% registeredCourses.forEach(function(course) { %>
+                <% registered_courses.forEach(function(course) { %>
                     <tr>
                         <td><%= course.course_id %></td>
                         <td><%= course.course_name %></td>
@@ -69,7 +69,7 @@
     <!-- Action: Register Button -->
     <h2>Available Courses</h2>
 
-    <% if (availableCourses && availableCourses.length > 0) { %>
+    <% if (available_courses && available_courses.length > 0) { %>
         <table border="1" cellpadding="8" cellspacing="0">
             <thead>
                 <tr>
@@ -83,7 +83,7 @@
                 </tr>
             </thead>
             <tbody>
-                <% availableCourses.forEach(function(course) { %>
+                <% available_courses.forEach(function(course) { %>
                     <tr>
                         <td><%= course.course_id %></td>
                         <td><%= course.course_name %></td>
